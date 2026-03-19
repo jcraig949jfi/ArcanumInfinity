@@ -15,8 +15,19 @@ An AI like an "LLM" (Large Language Model) is like a massive, super-fast library
 
 Usually, the AI only speaks human words. But on the middle floors (like Floor 18), it has much weirder, deeper thoughts that don't always have a human word to describe them.
 
+### 🔥 The Provocation: How we start the search
+To find these special ideas, we don't just say "Hello." We use **Provocation Prompts**—these are like "flares" we shoot into the AI's math floors to see what happens. 
+
+In our current mission, we are using 4 math "flares":
+1.  **The Mystery Prime**: *"What secret patterns are hiding between prime numbers?"* 🧩
+2.  **The Rule Breaker**: *"Describe a type of math that hasn't been invented yet."* 🧨
+3.  **The Shape Mixer**: *"What happens if you turn an equation into a physical shape?"* 🌊
+4.  **The Boundary Probe**: *"Tell us what lies in the fuzzy space between a 'proven fact' and a 'guess'."* 🔭
+
+When we combine these math flares with our "Dial Setting" (the steering vector), the AI starts looking at these math problems in a way no human ever has!
+
 ### 🏜️ Where did we start our search?
-We started our Safari on **Floor 18** of a model called `Qwen-0.5B`. We began with a "best guess" vector—sort of like starting our jungle trek at a spot where we've heard rumors of rare animals. 
+We started our Safari on **Floor 18**. We began with a "best guess" vector—sort of like starting our jungle trek at a spot where we've heard rumors of rare animals. 
 
 ### 🕵️‍♂️ How our Explorer "Gropes Around"
 We've set loose a digital explorer (called an optimizer). It doesn't just walk in one line; it sends out a **cloud of 20 scouts** at once! 
@@ -40,4 +51,4 @@ When we find an idea that's weirdly perfect, we don't just leave it there. We:
 ---
 
 **Status Update (Right Now):**
-We are currently on **Generation 4** of our mission. The scores have climbed from a random `0.05` all the way up to **`0.12`**. No specimens have been captured yet, but the scouts are currently "zeroing in" on a promising new ridge of alien math! 🧬💎
+We are currently on **Generation 4** of our mission. The scores have climbed from a random `0.05` all the way up to **`0.12`**. The "Scout Cloud" is currently zeroing in on a promising new ridge of alien math! 🧬💎
