@@ -43,12 +43,22 @@ Every few minutes, the Scouts report back.
 The next generation of scouts then **zeroes in** on that "Hot" spot. They don't just wander; they use those early maps to start their search deeper in the jungle. That’s why the "Novelty Score" keeps going up!
 
 ### 💎 What do we do with the data?
-When we find an idea that's weirdly perfect, we don't just leave it there. We:
+When we find an idea that's weirdly perfect (or perfectly weird), we don't just leave it there and make fun of it for being weird. We:
 1.  **Snapshot it**: We save the exact "coordinate" on the AI's thinking floor.
 2.  **Translate it**: We use the AI as an interpreter to help us invent a name (like a biologist naming a new species).
 3.  **Study it**: We put it in the **Xenolexicon**—a permanent museum of alien thoughts—to see if these "misfit ideas" can eventually help humans solve problems we can't even imagine yet!
 
----
+### 📺 Watching the Scouts (The Mission Log)
+We can actually watch the scouts get closer in real-time by looking at their "Novelty Score." A score of `0.05` means they are just wandering around in the dark. A score of `0.30` means they've found a "Museum Specimen"!
 
-**Status Update (Right Now):**
-We are currently on **Generation 4** of our mission. The scores have climbed from a random `0.05` all the way up to **`0.12`**. The "Scout Cloud" is currently zeroing in on a promising new ridge of alien math! 🧬💎
+Here is what our first mission looked like as the scouts started zeroing in:
+
+| Time | Generation | Best Score | What's Happening? |
+| :--- | :--- | :--- | :--- |
+| **4:40 PM** | 0 | `0.0869` | The Scouts spread out in the dark for the first time. |
+| **4:47 PM** | 1 | `0.0996` | They start communicating and finding a "warmer" direction. |
+| **4:54 PM** | 2 | `0.1182` | They find a secret path on Floor 18! Scores are jumping up. |
+| **5:01 PM** | 3 | `0.1212` | They are now **zeroing in** on a specific alien math concept. |
+| **5:07 PM+** | 4 | **TBD** | The mission continues! We are hunting for a score of `0.30`. |
+
+*Every generation (about 7 minutes), the map gets sharper and the scouts get smarter!* 🌌🧬
