@@ -59,13 +59,17 @@ Here is what our first mission looked like as the scouts started zeroing in:
 | **4:47 PM** | 1 | `0.0996` | They start communicating and finding a "warmer" direction. |
 | **4:54 PM** | 2 | `0.1182` | They find a secret path on Floor 18! Scores are jumping up. |
 | **5:01 PM** | 3 | `0.1212` | They are now **zeroing in** on a specific alien math concept. |
-| **5:07 PM+** | 4 | **TBD** | The mission continues! We are hunting for a score of `0.30`. |
+| **5:14 PM** | 7 | `0.1197` | A new high! The scouts found a major mathematical "ridge." |
+| **6:30 PM+** | 17 | `0.0898` | **Plateau!** The scouts are huddling in one spot. Time to pivot! |
 
-### 🔮 Can we predict a Victory?
-How do we know if we'll actually find a Unicorn Idea? Look for these **3 Victory Signs**:
+### 🏎️ The Great Screening (New Mission!)
+Sometimes, the scouts find a neat spot and set up camp. That’s what we call a **Plateau**. But if we want to find the really crazy stuff, we can’t stay in one spot forever. 
 
-1.  **The Staircase**: Is the Best Score going up every time? If it goes up generation after generation, the scouts are on a hot trail! 📈
-2.  **The Wide Search**: In the logs, look for **σ** (Sigma). If it's a big number (like `0.10`), the scouts are still being brave and exploring. If it gets really small, they’ve huddled together and might be stuck. 🗺️
-3.  **The Lucky Scout**: If a random scout on an "active" floor (like Floor 13) finds something cool, it means the whole AI brain is full of treasures, not just one spot! 💎
+We’ve just unlocked a new **"Speed Mode"** called the **Screener**. Instead of one long hike, we’re doing **175 micro-bursts**. 
+*   **The Idea Bank**: We have a list of over 170 wild questions about weird math and alien physics.
+*   **The Sprint**: A scout team takes *one* question, runs a 2-minute sprint, and sees if the AI says something "Hot."
+*   **The Filter**: If the question is "Cold," we skip it immediately. If it's "Hot," we mark it for a deep-dive later.
+
+This lets us search the entire "Idea Jungle" in one night instead of waiting weeks! 🚀🧬💎
 
 *If the staircase is steady and the scouts are brave, a discovery is just a matter of time!* 🌌🧬🧪
