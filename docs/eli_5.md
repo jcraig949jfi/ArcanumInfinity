@@ -61,4 +61,11 @@ Here is what our first mission looked like as the scouts started zeroing in:
 | **5:01 PM** | 3 | `0.1212` | They are now **zeroing in** on a specific alien math concept. |
 | **5:07 PM+** | 4 | **TBD** | The mission continues! We are hunting for a score of `0.30`. |
 
-*Every generation (about 7 minutes), the map gets sharper and the scouts get smarter!* 🌌🧬
+### 🔮 Can we predict a Victory?
+How do we know if we'll actually find a Unicorn Idea? Look for these **3 Victory Signs**:
+
+1.  **The Staircase**: Is the Best Score going up every time? If it goes up generation after generation, the scouts are on a hot trail! 📈
+2.  **The Wide Search**: In the logs, look for **σ** (Sigma). If it's a big number (like `0.10`), the scouts are still being brave and exploring. If it gets really small, they’ve huddled together and might be stuck. 🗺️
+3.  **The Lucky Scout**: If a random scout on an "active" floor (like Floor 13) finds something cool, it means the whole AI brain is full of treasures, not just one spot! 💎
+
+*If the staircase is steady and the scouts are brave, a discovery is just a matter of time!* 🌌🧬🧪
