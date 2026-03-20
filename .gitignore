@@ -135,6 +135,8 @@ results/*
 !results/reports/*.md
 experiments/
 logs/
+configs/*.yaml
+configs/*.json
 *.log*
 *.pt
 *.db
