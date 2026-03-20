@@ -1,14 +1,22 @@
 import json
 import re
 import os
+import glob
 import requests
 from datetime import datetime
+
+try:
+    import torch
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
 
 # Paths
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS_DIR = os.path.join(ROOT_DIR, "results", "screening")
 LOG_FILE = os.path.join(RESULTS_DIR, "logs", "xenolexicon.log")
 JSONL_FILE = os.path.join(RESULTS_DIR, "screening_log.jsonl")
+SPECIMENS_DIR = os.path.join(RESULTS_DIR, "specimens")
 
 # Config
 GITHUB_MODELS_URL = "https://models.inference.ai.azure.com/chat/completions"
@@ -48,6 +56,27 @@ def get_insight(prompt_text, score, feedback):
         return f"*(API Error: {resp.status_code})*"
     except Exception as e:
         return f"*(Insight Error: {str(e)})*"
+
+def build_uuid_map():
+    """Maps best_score to UUID by parsing permanent .pt files.
+    Gracefully degrades if torch is unavailable (returns empty map)."""
+    uuid_map = {}
+    if not HAS_TORCH:
+        print("  (torch not available — skipping .pt UUID recovery, using log-based UUIDs)")
+        return uuid_map
+    if not os.path.exists(SPECIMENS_DIR): return uuid_map
+    for f in os.listdir(SPECIMENS_DIR):
+        if f.endswith('.pt') and not f.endswith('_emb.pt'):
+            uuid = f.replace('.pt', '')
+            try:
+                data = torch.load(os.path.join(SPECIMENS_DIR, f), map_location='cpu', weights_only=True)
+                if isinstance(data, dict):
+                    score = float(data.get('novelty_score', 0.0))
+                    k = f"{score:.4f}"
+                    uuid_map[k] = uuid
+            except Exception:
+                pass
+    return uuid_map
 
 def parse_logs():
     data = {}
@@ -118,6 +147,38 @@ def parse_logs():
                     if cl: raw_lines.append(cl)
     return data
 
+def get_autopsy_data(uuid):
+    """Loads the Token Autopsy report text and cloud analysis JSON if they exist."""
+    result = {"text": None, "cloud": None}
+    if not uuid or uuid == "??": return result
+    
+    cloud_file = os.path.join(SPECIMENS_DIR, f"{uuid}_cloud.json")
+    text_file = os.path.join(SPECIMENS_DIR, f"{uuid}_autopsy.txt")
+    
+    if os.path.exists(cloud_file):
+        try:
+            with open(cloud_file, 'r', encoding='utf-8') as f:
+                result["cloud"] = json.load(f)
+        except Exception:
+            pass
+            
+    if os.path.exists(text_file):
+        try:
+            with open(text_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                # Extract the classification and reason 
+                lines = content.split("\n")
+                status = ""
+                reason = ""
+                for line in lines:
+                    if line.startswith("CLASSIFICATION:"): status = line.replace("CLASSIFICATION:", "").strip()
+                    if line.startswith("REASON:"): reason = line.replace("REASON:", "").strip()
+                result["text"] = {"full": content, "status": status, "reason": reason}
+        except Exception:
+            pass
+            
+    return result
+
 def generate_report():
     print("Reading data...")
     if not os.path.exists(JSONL_FILE): return
@@ -126,10 +187,21 @@ def generate_report():
     
     captures = sorted([l for l in lines if l['verdict'] == 'CAPTURE'], key=lambda x: x['best_score'], reverse=True)
     log_data = parse_logs()
+    uuid_map = build_uuid_map()
+    
+    model_name = "Unknown Model"
+    try:
+        with open(os.path.join(ROOT_DIR, 'configs', 'xenolexicon.yaml'), 'r', encoding='utf-8') as f:
+            for line in f:
+                if 'name:' in line and 'Qwen' in line:
+                    model_name = line.split('"')[1] if '"' in line else line.split("'")[1]
+                    break
+    except Exception:
+        pass
     
     report = [
         f"# Xenolexicon: Master Screening Catalog",
-        f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | **Model:** Qwen/Qwen2.5-0.5B-Instruct",
+        f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | **Model:** {model_name}",
         "",
         f"Total Specimens Captured: **{len(captures)}**",
         ""
@@ -139,12 +211,35 @@ def generate_report():
         k = f"{spec['best_score']:.4f}"
         info = log_data.get(k, {"uuid": "??", "name": "Unknown", "desc": "No logged feedback.", "metrics": "N/A"})
         
+        # Override UUID gracefully with eternal PyTorch file map if log parsing failed
+        real_uuid = uuid_map.get(k, info["uuid"])
+        info["uuid"] = real_uuid
+        
+        # Pull deep Token Autopsy Data
+        autopsy = get_autopsy_data(real_uuid)
+        
         report.append(f"### {i+1}. {spec['best_score']:.4f} {get_badge(spec['best_score'])}")
         report.append(f"- **Trigger**: \"{spec['prompt']}\"")
         report.append(f"- **Model Concept Name**: {info['name']}")
         report.append(f"- **Metadata**: UUID: `{info['uuid']}` | Layer: {spec['layer']} | Execution Time: {spec['elapsed_seconds']}s")
         report.append(f"- **Evaluation Metrics**: `{info['metrics']}`")
         report.append(f"- **Model Feedback/Leak**: {info['desc']}")
+        
+        # Inject Autopsy Analysis
+        if autopsy["text"] or autopsy["cloud"]:
+            report.append(f"")
+            report.append(f"#### 🧬 Token Autopsy Results")
+            if autopsy["text"] and autopsy["text"]["status"]:
+                badge = "🔴" if autopsy["text"]["status"] in ["COLLISION", "ECHO"] else "🟢"
+                report.append(f"- **Classification**: {badge} **{autopsy['text']['status']}**")
+            if autopsy["text"] and autopsy["text"]["reason"]:
+                report.append(f"- **Diagnosis**: {autopsy['text']['reason']}")
+            if autopsy["cloud"]:
+                cloud = autopsy["cloud"]
+                report.append(f"- **Mundane Mass**: {cloud.get('mundane_fraction', 0):.1%}")
+                report.append(f"- **Novelty Coherence**: {cloud.get('novelty_coherence', 0):.2f}")
+                domains = cloud.get('dominant_domains', [])
+                if domains: report.append(f"- **Dominant Domains**: {', '.join(domains)}")
         
         # Deep Insights for singularities (>0.35)
         if spec['best_score'] >= 0.35 and info['desc'] != "No logged feedback.":
@@ -155,10 +250,15 @@ def generate_report():
             report.append(f"  > {insight}")
         
         report.append("")
+        report.append("---")
+        report.append("")
 
-    with open(os.path.join(ROOT_DIR, "docs/Screening_Report_DeepAnalysis.md"), 'w', encoding='utf-8') as f:
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]
+    filename = f"Screening_Report_DeepAnalysis_{timestamp}.md"
+    filepath = os.path.join(ROOT_DIR, f"docs/{filename}")
+    with open(filepath, 'w', encoding='utf-8') as f:
         f.write("\n".join(report))
-    print("Report generated successfully.")
+    print(f"Report generated successfully: docs/{filename}")
 
 if __name__ == "__main__":
     generate_report()

@@ -1,8 +1,7 @@
 
 [Prompt]
 
-Generate 100 unusual, imaginative, and thought‑provoking questions within the broad domain of mathematics, theoretical physics, complexity science, high‑dimensional geometry, tensor methods, and related scientific fields.
-
+Generate 100 questions that violate or invert a foundational axiom, definition, or logical binary in mathematics or physics. Each question should take something that is true by definition — a category that is mutually exclusive, a property that is invariant, an operation that is unconditional — and ask what happens if that definitional certainty breaks. The questions should feel like category errors that somehow still have structure.
 
 
 Each question should:
@@ -24,4 +23,4 @@ The questions should explore:
 
 Do NOT provide answers.
 Do NOT explain the questions.
-Just output the 25 questions as a numbered list.
+Just output the 100 questions as a numbered list.

@@ -38,10 +38,9 @@ random_baseline_samples: 5     # Random vectors for calibration
 naming_max_tokens: 128
 
 # ── Model Rotation ──────────────────────────────────────────────
-# Start small for MVP. Qwen 0.5B fits comfortably in 16GB VRAM
-# with plenty of headroom for TransformerLens hooks and caching.
+# Start small for MVP. Qwen 1.5B is the new scaling target.
 models:
-  - name: "Qwen/Qwen2.5-0.5B-Instruct"
+  - name: "Qwen/Qwen2.5-1.5B-Instruct"
     target_layer_ratio: 0.75
     early_layer_ratio: 0.50
     generations_per_cycle: 30
