@@ -130,13 +130,13 @@ dmypy.json
 .pyre/
 
 # Xenolexicon specific
+configs/*
+!configs/*.example
 results/*
 !results/reports/
 !results/reports/*.md
 experiments/
 logs/
-configs/*.yaml
-configs/*.json
 *.log*
 *.pt
 *.db
