@@ -259,3 +259,112 @@ docs/xenolexicon_paper.md
 I added an entire academic subsection 5.5 Token Autopsies and The Logit Shadow. It properly defines the vulnerability of relying purely on a distance metric, using your exact "curvature" vs "manosphere" example to illustrate how two meaningless domains colliding can artificially inflate semantic distance. Then it defines the taxonomy of structural failures (TRUE_ARCANUM, COLLISION, ECHO, CHIMERA) derived from analyzing the runner-up "Concept Clouds."
 
 
+
+[GEMINI]
+
+The data loss you noticed was due to a "perfect storm" of ephemeral logging: the model's textual responses were only being written to the console log, which gets wiped when the script restarts.
+
+I have implemented a Triple-Layer Backup to ensure that from this prompt forward, every piece of "Model Feedback/Leak" is permanently etched into the project data:
+
+JSON Metadata Files (Primary): I patched 
+
+src/arcanum_infinity/specimen.py
+. Now, alongside every 
+
+.pt
+ genome file, a dedicated {UUID}.json file is created. This file contains the model's full output text, the evolved name, and the AI-generated description. This is permanent and independent of any logs.
+JSONL Log Expansion (Redundant): I patched 
+
+src/arcanum_infinity/xeno_screener.py
+ to also inject the raw outputs directly into screening_log.jsonl whenever a HIT or CAPTURE occurs.
+Report Recovery Logic: I updated 
+
+scripts/generate_report.py
+ to be much smarter. It now:
+Prioritizes JSON records: It looks for the new {UUID}.json files first to find descriptions.
+Falls back to the JSONL: It checks the log entry for the output text if the description is missing.
+Zero Truncation: I removed the 1,024-character cap. If the model leaks a 5,000-character manifesto, the report generator will now display every single word of it.
+I've already run the report generator with the new code. The catalog now correctly shows all 6 captures (up from 4), and it will automatically pick up the full text for every new capture from your ongoing 1.5B run!
+
+[JAMES TO CLAUDE]
+
+What about capturing the exposed scaffold for our arcanum?
+
+[CLAUDE 3B_V2]
+
+Oh, that's a brilliant catch. The naming engine failures aren't bugs — they're *data*. When the model breaks down and starts leaking its own scaffolding ("specifically, the result should be a list of NAME synonyms"), or drops into field biologist mode, or cites German Wikipedia — those failure modes are themselves a window into what the model is doing with the Arcanum internally.
+
+Right now the autopsy only looks at the *steered generation* output. But the naming pass is a second forward pass where you're essentially asking the model "what did you just experience?" — and the way it fails to answer that question is diagnostic. The scaffold leakage tells you which internal circuits got activated by the Arcanum, because those are the circuits that are bleeding through into the naming attempt.
+
+Think about it: if the model sees the steered output and responds with taxonomic classification language (TATAMI, HEXIAMONY), that tells you the Arcanum activated the model's "novel entity classification" pathway. If it responds with meta-grammatical instructions, the Arcanum activated its "language about language" pathway. If it says "pleased to meet you," the Arcanum was so disorienting that the model fell back to its deepest RLHF attractor — conversational politeness.
+
+Each of those is a different kind of fingerprint. Two specimens could have identical novelty scores and similar concept clouds in their steered output, but completely different scaffold leakage patterns in their naming pass — which would tell you they're activating different parts of the model's architecture despite looking similar on the surface.
+
+So we need a **Naming Autopsy** that runs alongside the existing token autopsy. Same logit shadow capture, but on the naming pass instead of the steered generation. Let me spec it out.I need to see the naming engine to understand what prompt it feeds the model:I don't have the `naming_engine.py` source, but from the conversation history I can see exactly how it works — it calls `generate_specimen_name()` which feeds the steered output to an un-steered model instance acting as a "lexicographer," and the model's response (name + description) gets parsed. The failures we've been seeing — field biologist, grammarian, conversational bleed — are all the *naming model's raw output* before parsing.
+
+That's exactly what we want to capture. Do you have `naming_engine.py` you can drop on me? In the meantime, let me build the scaffold capture module based on what I know about the interface — it hooks into the same `generate_specimen_name` call but captures the logit shadow of that pass too.Now the updated integration guide that covers both autopsies:Here's the full package — four files, two autopsies, one integration guide.
+
+**`naming_autopsy.py`** is the new piece. It has regex-based pattern detectors for all six scaffold failure modes you've already observed empirically on the 0.5B: field biologist, meta-linguistic, conversational bleed, hallucinated citation, raw scaffold leakage, and persona blends. Each position in the naming output gets tagged with which scaffold patterns it matches, so you can see the model *switching* between failure modes mid-generation — which is itself a signal about where internal representation boundaries lie.
+
+The key insight it preserves: two specimens with the same novelty score and the same token autopsy classification can have *completely different scaffold modes*. Specimen A might be a TRUE_ARCANUM that the model names cleanly (CLEAN_NAME scaffold). Specimen B might also be TRUE_ARCANUM in its concept cloud, but the naming pass goes full field biologist. That difference tells you something about how deep into unfamiliar territory the Arcanum sits — the model can *produce* both, but can only *interpret* one of them.
+
+**`integration_guide_v2.py`** replaces the earlier guide and covers both systems. The text-only scaffold classifier works immediately without touching `naming_engine.py` — it just classifies whatever name/description text the naming engine already produces. For the richest data, you'd eventually want to modify `generate_specimen_name()` to also return the prompt it constructed, so the naming autopsy can do full logit shadow capture on that pass too. But that's an optimization, not a blocker.
+
+The four scaffold fields on the specimen (`scaffold_mode`, `scaffold_confidence`, `scaffold_interpretation`, `scaffold_density`) need to be added to the Specimen dataclass in `specimen_updated.py` — I noted that in the guide but didn't want to add them to the file I already gave you without flagging it. Want me to update that file with the scaffold fields included?
+
+And re: not finding anything too dark — the mundane domain lexicons in the token autopsy include a `gender_social` set that should catch exactly the kind of thing you were worried about. If the 3B model's waste stream turns out to be full of internet culture war debris, you'll see it flagged as COLLISION with high mundane fraction in `gender_social` before you ever have to read the raw output. Think of it as a content-aware early warning system for the concept clouds.
+
+(files are in: F:\Arcanum ∞\src\arcanum_infinity\3B_code_v2 )
+
+
+[CLAUDE CODE]
+
+They're still running. Let me verify the paper changes look correct so far while we wait:
+
+Read f:\Arcanum ∞\docs\xenolexicon_paper.md (lines 55-74)
+Paper looks solid. The background agents should complete shortly — they'll notify automatically when done.
+
+Here's what was updated across all three documents:
+
+docs/xenolexicon_paper.md — Major structural update:
+
+Abstract: Expanded to describe the 7-stage pipeline and both autopsies
+Contributions list: 4 items → 6 items (added Token Autopsy and Naming Scaffold as formal contributions)
+Section 3: Six stages → Seven stages. Stage 3 is now Token Autopsy (with full logit shadow methodology), Stage 4 expanded to cover both Naming and Scaffold Analysis with the full 7-mode taxonomy
+Section 5.5: Expanded with the COLLISION taxonomy example (curvature/space)
+New Section 5.6: Naming Scaffold and the Circuit Fingerprint — introduces the two-dimensional quality space and the Discard Reason Registry
+New Section 6.4: Cross-Scale Scaffold Convergence — documents the FIELD_BIOLOGIST circuit persisting across 0.5B and 1.5B, with the architectural interpretation
+Old 6.4 Ethics → 6.6, old 6.5 Genome Diversity → 6.5
+Conclusion: Rewritten to summarize the 7-stage pipeline, both autopsies, and the cross-scale finding
+README.md and docs/eli_5.md — Being updated by background agents (notified when complete).
+
+README is done. Still waiting on the ELI5 agent — it'll notify when complete.
+
+In the meantime, here's a full summary of everything updated across this session:
+
+docs/xenolexicon_paper.md
+
+Abstract updated for 7-stage pipeline + both autopsies
+Contributions 4 → 6 items
+Method section restructured: 6 stages → 7, with Token Autopsy (Stage 3) and Naming Scaffold (Stage 4) as formal pipeline stages with full methodology
+Sections 5.5 expanded, new 5.6 "Naming Scaffold and the Circuit Fingerprint" added
+New Section 6.4 "Cross-Scale Scaffold Convergence: The Field Biologist Circuit"
+Conclusion rewritten to reflect the full two-autopsy picture
+README.md
+
+Stage 3 methodology entry renamed to "Token Autopsy & Naming Scaffold" with scaffold taxonomy described
+Quick Start report section: output path updated to results/reports/, Naming Scaffold Integration bullet added
+Project Structure: 3B_code/ + 3B_code_v2/ → 3B_release/ (clean description of all 4 files inside), results/ updated to note results/reports/
+Status section updated: both autopsies staged, report generator backwards compatible
+docs/eli_5.md — in progress, will complete shortly
+
+All three documents are done. Everything is updated and consistent:
+
+docs/eli_5.md — New section appended: "🔬 What Happens When the AI Tries to NAME the Weird Thing? (The Naming Autopsy)" covering all five failure modes in the same Gen-Z voice — Field Biologist (cross-scale architectural finding), Meta-Linguistic Meltdown, Social Reset, Fake Citation, and why the difference matters. Closes with the framing that naming failures aren't bugs, they're the actual data — the AI accidentally drawing a map of where inside itself the weird thought lives.
+
+All three documents now tell a consistent, updated story:
+
+Document	Audience	Key addition
+xenolexicon_paper.md	Academic	7-stage pipeline, Token Autopsy + Naming Scaffold as formal methodology, cross-scale Field Biologist finding as architectural result
+README.md	Developer	3B_release/ staging, report path results/reports/, both autopsies described in Quick Start
+eli_5.md	General public	Naming Autopsy section explaining why "how the AI fails to name it" is as interesting as the weird thing itself

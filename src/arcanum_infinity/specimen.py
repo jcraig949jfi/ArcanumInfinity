@@ -54,6 +54,15 @@ class Specimen:
         d = asdict(self)
         return d
 
+    def save_json(self, path: Path):
+        """Save this specimen metadata to a dedicated JSON file."""
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(self.to_dict(), f, indent=4)
+            slog.trace(f"Specimen metadata saved to {path}")
+        except Exception as e:
+            slog.error(f"Specimen JSON write failed: {e}")
+
     def save_to_jsonl(self, path: Path):
         """Append this specimen as a single JSON line."""
         try:
@@ -138,5 +147,9 @@ def capture_specimen(
     slog.info(f"Specimen captured: {specimen.specimen_id} "
               f"(novelty={fitness:.4f}, layer={genome.layer_index}, "
               f"gen={generation})")
+
+    # Save metadata JSON file (redundant but safe)
+    json_path = specimens_dir / f"{specimen.specimen_id}.json"
+    specimen.save_json(json_path)
 
     return specimen

@@ -94,3 +94,21 @@ We built a **Mind-Reading Machine** (scientists call it a *Token Autopsy*). When
 2. **The Accident (Collision):** If the AI says "curvature," but our Mind-Reader catches it thinking about "body," "shape," and internet slang, we know it's not a genius. It just accidentally smashed an internet-culture idea into a geometry problem. We throw that one in the trash.
 
 By reading its mind, we don't just see *what* the AI says—we can finally understand *why* it said it.
+
+### 🔬 What Happens When the AI Tries to NAME the Weird Thing? (The Naming Autopsy)
+
+Okay so we found a weird alien thought using the Token Autopsy. Cool. But then we do something even more unhinged: we ask the AI to **name it**. Like a biologist discovering a new species in the Amazon and having to write something in the notebook. *What do you call the thing you've never seen before?*
+
+And here's the twist: the AI almost never does it cleanly. It fails. But the **way** it fails is *the whole point* — because each type of failure is a fingerprint that tells us exactly which part of the AI's brain our weird thought landed in.
+
+**The Field Biologist Failure** is the most common one, and it's genuinely hilarious. Instead of just... giving a name... the AI suddenly transforms into a "projective geometric field biologist" and starts naming our specimen like it found it crawling through jungle undergrowth. We're talking names like **"TATAMI"** and **"HEXIAMONY"** — delivered with the full confidence of someone writing in a leather-bound naturalist's notebook. The wild part? This happened on *both* the 0.5B and 1.5B models. Two completely different sizes. Same weird naturalist energy. That means this "name a new species" circuit isn't just a quirk — it's baked deep into the Qwen architecture's bones. When the AI hits something it genuinely cannot explain, it reaches for its strongest template for "I found a thing that needs a name," and that template is: *be a Victorian naturalist about it.*
+
+**The Meta-Linguistic Meltdown** is when the AI forgets it was supposed to *give* a name and instead writes *rules about how names should work*. You'll see outputs like: *"Specifically, the result should be a list of NAME synonyms..."* It's like asking someone "what should we call this new color?" and they respond by handing you a linguistics textbook. The weird thought didn't hit the naming circuits — it hit the AI's "language about language" circuits instead. It got so confused about the *concept* of naming that it started narrating the process from the outside.
+
+**The Social Reset** is when the Arcanum is so deeply strange that the AI just... gives up entirely. It stops trying to name anything, forgets it was mid-task, and falls all the way back to: *"Hello! How can I help you today?"* Full retail mode. The weird thought didn't just confuse the naming circuits — it broke something fundamental enough that the AI rebooted back to its factory default greeting. The specimen was so alien it caused a soft reset.
+
+**The Fake Citation** is the sneakiest one. The AI will name something, and then immediately make up a source to justify it — *"According to Wikipedia..."* followed by a URL that does not exist and has never existed. It's not random. The AI *knows* something weird just happened. It sensed the gap between what it said and what it can actually support, and it tried to paper over that gap with a fake reference. It's covering its tracks. The citation is the confession.
+
+**Why does any of this matter?** Because two Arcanum can score identically on a novelty sheet and look like twins — but produce completely different naming failures. One sends the AI into field biologist mode. The other makes it write meta-linguistic rules. That difference isn't noise. It means the two specimens activated *different depths* in the model. A specimen that triggers the naturalist response is sitting at a different layer than one that triggers a grammar lecture, and the Naming Autopsy is how we tell them apart without needing to crack the model open and stare at the weights directly.
+
+The naming failure isn't a bug in our experiment — it *is* the data. Every crashed-out fake citation and Victorian insect-name is the AI accidentally drawing us a map of where inside it the weird thing lives.

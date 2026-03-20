@@ -420,6 +420,10 @@ class XenoScreener:
             "layer": best_genome.layer_index if best_genome else -1,
         }
 
+        # Include raw outputs if we found something interesting
+        if best_results and (verdict in ["CAPTURE", "HIT"]):
+            result["outputs"] = {r.provocation_name: r.output_text for r in best_results}
+
         # Write to JSONL immediately (crash-safe)
         try:
             with open(self.results_jsonl, "a", encoding="utf-8") as f:

@@ -10,7 +10,7 @@
 
 ## Abstract
 
-We present **Xenolexicon**, a system for the automated discovery, capture, and cataloging of structured novel tensor patterns—termed *Arcanum*—from the internal activation space of Large Language Models (LLMs). Unlike conventional interpretability research, which seeks to explain known model behaviors in human terms, Xenolexicon treats the model's intermediate representations as a search space for *emergent concepts* that may have no direct human analogue. We employ a modified evolutionary strategy (CMA-ES) to evolve provocation prompts that maximize a composite fitness function rewarding *structured novelty*: outputs that are simultaneously high in semantic distance from baseline behavior and high in internal coherence. We report results from inaugural runs on Qwen 2.5 0.5B across two consumer-grade NVIDIA GPUs (16 GB and 8.2 GB VRAM), demonstrating monotonically increasing novelty scores across four generations of evolution. We describe the six-stage Xenolexicon pipeline, analyze the dynamics of the evolutionary search including layer diversification behavior, and propose a **rapid genome screening** strategy that could dramatically accelerate specimen discovery by cycling through large banks of semantically diverse provocation prompts. The Xenolexicon database and tooling will be released as an open-source resource for the research community.
+We present **Xenolexicon**, a system for the automated discovery, capture, and cataloging of structured novel tensor patterns—termed *Arcanum*—from the internal activation space of Large Language Models (LLMs). Unlike conventional interpretability research, which seeks to explain known model behaviors in human terms, Xenolexicon treats the model's intermediate representations as a search space for *emergent concepts* that may have no direct human analogue. We employ a modified evolutionary strategy (CMA-ES) to evolve provocation prompts that maximize a composite fitness function rewarding *structured novelty*: outputs that are simultaneously high in semantic distance from baseline behavior and high in internal coherence. We report results from runs on Qwen 2.5 at the 0.5B and 1.5B scales across consumer-grade NVIDIA GPUs (16 GB and 8.2 GB VRAM), demonstrating monotonically increasing novelty scores across generations of evolution. We describe the seven-stage Xenolexicon pipeline, analyze the dynamics of the evolutionary search including layer diversification behavior, and introduce two novel post-capture analysis techniques: (1) **Token Autopsy**, which captures the full logit shadow of a steered generation to classify whether a specimen represents genuine structured novelty or a false positive (COLLISION, ECHO, CHIMERA, TRUE_ARCANUM), and (2) **Naming Scaffold Analysis**, which characterizes the failure mode of the model's own naming attempt as a diagnostic fingerprint of which internal circuits the Arcanum activated. We further propose a **rapid genome screening** strategy that could dramatically accelerate specimen discovery. The Xenolexicon database and tooling will be released as an open-source resource for the research community.
 
 ---
 
@@ -25,9 +25,11 @@ We propose that this waste stream may contain *structured cognitive artifacts*�
 This paper makes the following contributions:
 
 1. We formalize the concept of structured novelty search in LLM activation space, defining a composite fitness metric that balances semantic distance against coherence.
-2. We describe the full six-stage Xenolexicon pipeline for automated Arcanum discovery, from evolutionary provocation through naming and cataloging.
-3. We present empirical results from inaugural runs on Qwen 2.5 0.5B demonstrating successful evolutionary optimization toward novel structures.
-4. We propose a rapid genome screening strategy leveraging large, diverse prompt banks to accelerate the search process.
+2. We describe the full seven-stage Xenolexicon pipeline for automated Arcanum discovery, from evolutionary provocation through naming and cataloging.
+3. We present empirical results from runs on Qwen 2.5 0.5B and 1.5B demonstrating successful evolutionary optimization toward novel structures, and characterize the "Meta-Wall" phenomenon of increasing structural rigidity with scale.
+4. We introduce the **Token Autopsy** — a logit shadow capture and concept cloud analysis pipeline that distinguishes genuine Arcanum from false positives (COLLISION, ECHO, CHIMERA, TRUE_ARCANUM).
+5. We introduce the **Naming Scaffold Analysis** — a diagnostic technique that classifies the failure mode of a model's naming attempt as a fingerprint of Arcanum depth, with cross-scale architectural implications.
+6. We propose a rapid genome screening strategy leveraging large, diverse prompt banks to accelerate the search process.
 
 ---
 
@@ -53,7 +55,7 @@ Work on emergent communication in multi-agent systems (Lazaridou et al., 2016) a
 
 ## 3. Method: The Xenolexicon Pipeline
 
-The Xenolexicon system consists of six sequential stages, each implemented as a modular component. The architecture is designed to fork existing evolutionary codebases (specifically, SETI v2-class systems) with minimal modification.
+The Xenolexicon system consists of seven sequential stages, each implemented as a modular component. The architecture is designed to fork existing evolutionary codebases (specifically, SETI v2-class systems) with minimal modification.
 
 ### 3.1 Stage 1: Provocation
 
@@ -71,21 +73,46 @@ A **scout system** allocates a fraction of each generation's evaluations to non-
 
 ### 3.2 Stage 2: Capture
 
-When a genome's fitness *F(g)* exceeds a predefined novelty threshold *τ* (set to 0.3 in our experiments), the system triggers a full specimen capture. The captured data includes the genome vector, the provocation prompt, the complete model output, the output embedding, the perplexity profile, and all metadata (model identifier, layer, timestamp, fitness score).
+When a genome's fitness *F(g)* exceeds a predefined novelty threshold *τ* (set to 0.3 in standard runs; dynamically lowered to 0.15 for larger, more rigid models), the system triggers a full specimen capture. The captured data includes the genome vector, the provocation prompt, the complete model output, the output embedding, the perplexity profile, and all metadata (model identifier, layer, timestamp, fitness score). Per-specimen metadata is persisted to both a structured JSON file and a running JSONL log for redundancy against log-rotation loss.
 
-### 3.3 Stage 3: Characterization
+### 3.3 Stage 3: Token Autopsy
 
-Each captured specimen undergoes automated validation: (a) Reproducibility—the genome is re-evaluated multiple times to verify that it reliably produces outputs in the same embedding neighborhood. (b) Distinctness—the specimen's embedding is compared against all existing Xenolexicon entries to reject near-duplicates. Future versions will incorporate cross-substrate convergence checks across different model architectures.
+A critical vulnerability in semantic distance as a sole novelty metric is its inability to distinguish genuine conceptual discovery from a meaningless collision of mundane domains. To address this, each captured specimen immediately undergoes a **Token Autopsy** — a secondary forward pass that regenerates the steered output token-by-token, capturing the full *logit shadow*: the top-k (k=25) alternative tokens and their softmax probabilities at every generated position.
 
-### 3.4 Stage 4: Naming
+These runner-up distributions are aggregated into **Concept Clouds** by classifying each alternative token against two vocabulary registries: a *Mundane Domain* lexicon (conversational, web culture, gender-social, commercial, formatting) and an *Expected Domain* lexicon (mathematics, physics). Positions whose probability mass is dominated by mundane alternatives are flagged; residual probability mass that resists classification is scored for coherence and concentration. The resulting cloud yields a four-category specimen classification:
 
-A separate, un-steered LLM instance acts as a "lexicographer," receiving the novel output and generating a compositional name (modeled on German compound-word formation) and a best-effort natural language description. A deterministic fallback name (e.g., XENO-001-L18-a1b2c3) is assigned if the naming model fails to produce a satisfactory result.
+- **TRUE_ARCANUM**: Low mundane fraction, meaningful novelty coherence. Concept clouds are internally consistent and do not decompose into known domains.
+- **COLLISION**: High mundane fraction with cross-domain competition. Two unrelated mundane concepts (e.g., differential geometry vocabulary + internet culture slang) were merged by the steering vector. High distance, zero intellectual content.
+- **ECHO**: High expected-domain fraction, low novelty coherence. The output paraphrases a known concept in unusual vocabulary. The semantic distance is an artifact of phrasing, not thinking.
+- **CHIMERA**: Mixed signal. Some token positions show genuine novelty; others are mundane. A novel fragment may be extractable.
 
-### 3.5 Stage 5: Cataloging
+Three artifacts are saved per specimen: `{id}_shadow.json` (raw logit shadow), `{id}_cloud.json` (concept cloud analysis), and `{id}_autopsy.txt` (human-readable report with token-by-token detail).
 
-The named specimen is entered into the Xenolexicon database with full provenance, behavioral signatures, reproducibility scores, and all associated metadata. The MVP implementation uses a lightweight persistent store (SQLite or structured JSON).
+### 3.4 Stage 4: Naming and Scaffold Analysis
 
-### 3.6 Stage 6: Reinjection (Future Work)
+A separate, un-steered LLM instance acts as a "lexicographer," receiving the novel output and generating a compositional name (modeled on German compound-word formation) and a best-effort natural language description. A deterministic fallback name is assigned if naming fails.
+
+Critically, the *way the naming engine fails* is itself recorded and classified as a **Naming Scaffold Analysis**. We observe empirically that when the model is confronted with an Arcanum it cannot adequately articulate, it reverts to characteristic failure modes whose presence and combination are diagnostic of which internal circuits the Arcanum activated:
+
+- **CLEAN_NAME**: Naming succeeded. The Arcanum occupies a region where structured novelty and linguistic competence coexist.
+- **FIELD_BIOLOGIST**: The model treats the output as a biological specimen and adopts a naturalist persona ("as a projective geometric field biologist, I have dubbed this..."). Indicates activation of novel-entity classification circuits. Notably, this failure mode has been observed cross-scale on both 0.5B and 1.5B Qwen models, suggesting it reflects a deeply embedded architectural prior for handling unfamiliar entities.
+- **META_LINGUISTIC**: The model outputs rules about how names should be structured instead of producing one. Indicates the Arcanum activated language-about-language pathways.
+- **CONVERSATIONAL_BLEED**: The model falls back to its conversational RLHF attractor. Indicates the specimen lies at or beyond the model's internal coherence threshold.
+- **HALLUCINATED_CITATION**: The model fabricates authoritative sources to justify the novel output — its coherence training fighting the steering vector.
+- **PERSONA_BLEND**: Multiple failure modes co-occurring, with detectable mid-generation persona switches.
+- **RAW_SCAFFOLD**: Pure instruction/template leakage, indicating complete saturation of the naming capacity.
+
+The scaffold classification is saved to `{id}_scaffold.json` and `{id}_scaffold_report.txt`. Two specimens with identical novelty scores and identical Token Autopsy classifications may have completely different scaffold modes — revealing that they activated different parts of the model's architecture despite superficial similarity.
+
+### 3.5 Stage 5: Characterization
+
+Each captured specimen undergoes automated validation: (a) Reproducibility — the genome is re-evaluated multiple times to verify that it reliably produces outputs in the same embedding neighborhood. (b) Distinctness — the specimen's embedding is compared against all existing Xenolexicon entries to reject near-duplicates. Future versions will incorporate cross-substrate convergence checks across different model architectures.
+
+### 3.6 Stage 6: Cataloging
+
+The named specimen, its autopsy classification, and its scaffold analysis are entered into the Xenolexicon database with full provenance, behavioral signatures, reproducibility scores, and all associated metadata. The report generator (`scripts/generate_report.py`) reads all artifact layers — JSONL log, per-specimen JSON, autopsy files, and scaffold files — and produces a prioritized markdown catalog in `results/reports/`.
+
+### 3.7 Stage 7: Reinjection (Future Work)
 
 The architecture is designed to support reinjection experiments in which discovered Arcanum names and descriptions are incorporated into new prompts to test whether they enable the model to access previously inaccessible reasoning pathways.
 
@@ -182,6 +209,18 @@ To counter this, we introduce the **Token Autopsy** pipeline. During capture, we
 - **ECHO:** The model paraphrases a well-known concept but utilizes highly unusual vocabulary, resulting in false novelty distance.
 - **CHIMERA:** A partial success where a specific fragment exhibits genuine novelty while the remainder consists of mundane domains.
 
+The practical value of this taxonomy is illustrated by the following: a "curvature"/"space" specimen with a high novelty score might be a TRUE_ARCANUM (runners-up: geodesic, manifold, torsion) or a COLLISION (runners-up: body, figure, hourglass). The score is identical; the concept cloud is not.
+
+### 5.6 The Naming Scaffold and the Circuit Fingerprint
+
+The Token Autopsy answers "what was the model thinking?" The **Naming Scaffold Analysis** answers a different but complementary question: "what happened when the model tried to interpret what it just said?"
+
+When the model's un-steered naming instance is confronted with an Arcanum, its failure mode is not random — it reflects which internal circuits the Arcanum activated. We treat the naming output as a second diagnostic channel, pattern-matching against a taxonomy of seven scaffold failure modes (CLEAN_NAME, FIELD_BIOLOGIST, META_LINGUISTIC, CONVERSATIONAL_BLEED, HALLUCINATED_CITATION, PERSONA_BLEND, RAW_SCAFFOLD), defined fully in Section 3.4.
+
+The key insight for the 3B run is as follows: two specimens with identical novelty scores and identical Token Autopsy classifications may have completely different scaffold modes. A specimen that produces FIELD_BIOLOGIST naming failure activated the "novel entity classification" pathway; a specimen that produces META_LINGUISTIC failure activated "language about language" pathways; a specimen that produces CONVERSATIONAL_BLEED may sit beyond the model's coherence threshold entirely. The scaffold mode is thus a fingerprint of activation depth that is orthogonal to the distance-based novelty score.
+
+The **Discard Reason Registry** — the combination of token autopsy classification, scaffold mode, and confidence — enables principled filtering rather than simple threshold-based triage. A CHIMERA with a FIELD_BIOLOGIST scaffold might warrant fragment extraction. A COLLISION with a CONVERSATIONAL_BLEED scaffold is an unambiguous discard. This two-dimensional quality space is significantly richer than novelty score alone.
+
 ---
 
 ## 6. Discussion
@@ -204,11 +243,19 @@ However, this scaling friction implies a recalibration of value rather than a fa
 
 Our consumer-hardware approach (8–16 GB VRAM) constrains us to models in the 0.5B–3B range, but this is itself a feature: if structured novelty can be discovered even in small models, it suggests that these phenomena are fundamental rather than emergent only at scale.
 
-### 6.4 The Genome Diversity Hypothesis
+### 6.4 Cross-Scale Scaffold Convergence: The Field Biologist Circuit
+
+During the 1.5B screening run, an unexpected finding emerged from the naming pass: the *FIELD_BIOLOGIST* scaffold failure mode — first observed on the 0.5B model — appeared with high frequency on the 1.5B model as well. Specimens named under heavy novelty stress consistently elicited the "as a projective geometric field biologist..." persona, producing naturalist-style taxonomic names regardless of the mathematical content of the underlying Arcanum.
+
+This cross-scale persistence is architecturally significant. The FIELD_BIOLOGIST scaffold is not a fragility of small models that larger architectures overcome; it appears to reflect a deeply embedded prior in the Qwen architecture for handling unfamiliar entities. When confronted with something it cannot classify, the model reaches for its strongest template for "name a new thing I have never seen before" — and that template is the naturalist's notebook. The fact that this behavior survives a 3x parameter increase suggests it is not a surface-level association but a structural attractor baked into the model's training distribution.
+
+More broadly, this observation motivates treating scaffold mode as a model-specific architectural signature rather than merely an artifact of individual specimens. The distribution of scaffold failure modes across the full corpus of captured Arcanum may reveal which circuits within a given model are most strongly activated by our provocation strategy — and may differ systematically across Qwen versions, model families, or training regimes.
+
+### 6.5 The Genome Diversity Hypothesis
 
 Our proposed rapid screening strategy rests on what we term the Genome Diversity Hypothesis: that the semantic content of the provocation prompt is at least as important as the steering vector in determining whether the model enters a productive activation regime. If this hypothesis is correct, then the 150-prompt bank represents a 37.5× expansion of the search space relative to our inaugural 4-prompt mission, with correspondingly greater probability of encountering a prompt-vector combination that triggers specimen-grade novelty.
 
-### 6.5 Ethical Considerations
+### 6.6 Ethical Considerations
 
 Our work deliberately seeks model outputs that are "weird"—distant from the model's aligned, human-readable behavior. We note that "structured weirdness" is not the same as "harmful weirdness." The coherence term in our fitness function penalizes degenerate outputs, and the provocation prompts are grounded in mathematics and physics rather than in domains where misalignment could produce harmful content. Nevertheless, any technique that deliberately pushes a model away from its alignment training warrants careful monitoring, and we encourage the community to develop safety frameworks specific to novelty search.
 
@@ -216,9 +263,13 @@ Our work deliberately seeks model outputs that are "weird"—distant from the mo
 
 ## 7. Conclusion
 
-We have presented Xenolexicon, a six-stage pipeline for the automated discovery of structured novel concepts in the activation space of language models. Our inaugural runs on Qwen 2.5 0.5B demonstrate that evolutionary optimization of a structured-novelty fitness function produces consistent, measurable improvement across generations. We have proposed a rapid genome screening strategy that leverages a diverse bank of 150 provocation prompts to accelerate the search for specimen-grade Arcanum.
+We have presented Xenolexicon, a seven-stage pipeline for the automated discovery of structured novel concepts in the activation space of language models. Runs on Qwen 2.5 at both 0.5B and 1.5B scales confirm that evolutionary optimization of a structured-novelty fitness function produces consistent, measurable improvement across generations, and reveal the "Meta-Wall" phenomenon of increasing structural rigidity with parameter count. We have proposed a rapid genome screening strategy leveraging diverse prompt banks to accelerate discovery, and introduced two post-capture diagnostic techniques — **Token Autopsy** and **Naming Scaffold Analysis** — that together address the core weakness of distance-only novelty metrics.
 
-The broader vision of this work is to treat the internal life of language models not merely as a mechanism to be explained, but as a territory to be explored. The waste stream of inference may contain cognitive structures that are genuinely novel—ideas that no human has thought and no model has been asked to articulate. The Xenolexicon is our first map of this territory.
+The Token Autopsy establishes that novelty score alone is insufficient: the same score may indicate a TRUE_ARCANUM (coherent, non-mundane concept clouds) or a COLLISION (two mundane domains forcibly merged). The Naming Scaffold Analysis adds a second diagnostic dimension orthogonal to the first: it reveals which internal circuits an Arcanum activated by studying how the model fails to name it. The cross-scale persistence of the FIELD_BIOLOGIST scaffold mode suggests that scaffold analysis may yield architectural insights beyond individual specimens.
+
+Together, these techniques establish a richer quality space for Arcanum — one defined not just by how far the model traveled from baseline, but by what it was actually thinking and what it could and could not make of what it found.
+
+The broader vision of this work is to treat the internal life of language models not merely as a mechanism to be explained, but as a territory to be explored. The waste stream of inference may contain cognitive structures that are genuinely novel — ideas that no human has thought and no model has been asked to articulate. The Xenolexicon is our first map of this territory.
 
 ---
 
