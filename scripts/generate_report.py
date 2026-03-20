@@ -3,6 +3,7 @@ import re
 import os
 import glob
 import requests
+import socket
 from datetime import datetime
 
 try:
@@ -374,7 +375,8 @@ def generate_report():
         report.append("")
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]
-    filename = f"Screening_Report_DeepAnalysis_{timestamp}.md"
+    hostname = socket.gethostname().lower().replace(" ", "_")
+    filename = f"{hostname}_Screening_Report_DeepAnalysis_{timestamp}.md"
     reports_dir = os.path.join(ROOT_DIR, "results", "reports")
     os.makedirs(reports_dir, exist_ok=True)
     filepath = os.path.join(reports_dir, filename)
