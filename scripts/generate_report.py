@@ -5,9 +5,9 @@ import requests
 from datetime import datetime
 
 # Paths
-ROOT_DIR = r"f:\Arcanum ∞"
-RESULTS_DIR = os.path.join(ROOT_DIR, r"results\screening")
-LOG_FILE = os.path.join(RESULTS_DIR, r"logs\xenolexicon.log")
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS_DIR = os.path.join(ROOT_DIR, "results", "screening")
+LOG_FILE = os.path.join(RESULTS_DIR, "logs", "xenolexicon.log")
 JSONL_FILE = os.path.join(RESULTS_DIR, "screening_log.jsonl")
 
 # Config
