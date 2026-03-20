@@ -1,7 +1,7 @@
 
 [Prompt]
 
-Generate 25 unusual, imaginative, and thought‑provoking questions within the broad domain of mathematics, theoretical physics, complexity science, high‑dimensional geometry, tensor methods, and related scientific fields.
+Generate 100 unusual, imaginative, and thought‑provoking questions within the broad domain of mathematics, theoretical physics, complexity science, high‑dimensional geometry, tensor methods, and related scientific fields.
 
 Each question should:
 - be phrased as a single sentence

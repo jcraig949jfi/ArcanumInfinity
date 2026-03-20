@@ -132,6 +132,8 @@ dmypy.json
 # Xenolexicon specific
 results/
 experiments/
+logs/
+*.log*
 *.pt
 *.db
 orchestrator.pid
