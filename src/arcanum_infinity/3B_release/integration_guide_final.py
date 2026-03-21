@@ -101,6 +101,8 @@ def _attempt_fast_capture_3B(self, engine, genome, score, meta,
         specimen.scaffold_confidence = scaffold_class.confidence
         specimen.scaffold_interpretation = scaffold_class.interpretation
         specimen.scaffold_density = scaffold_class.scaffold_density
+        specimen.scaffold_neologism_count = scaffold_class.neologism_count
+        specimen.scaffold_cross_lingual_scripts = scaffold_class.cross_lingual_scripts
 
         # Save scaffold artifacts to disk
         self.naming_autopsy.save_scaffold_data(
@@ -205,5 +207,5 @@ New fields on specimen JSONL:
   autopsy_discard_reason, autopsy_mundane_fraction,
   autopsy_novelty_coherence, autopsy_dominant_domains, autopsy_summary,
   scaffold_mode, scaffold_confidence, scaffold_interpretation,
-  scaffold_density
+  scaffold_density, scaffold_neologism_count, scaffold_cross_lingual_scripts
 """

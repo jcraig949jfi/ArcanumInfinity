@@ -67,6 +67,8 @@ class Specimen:
     scaffold_confidence: float = -1.0
     scaffold_interpretation: str = ""
     scaffold_density: float = -1.0      # Fraction of naming tokens with scaffold signals
+    scaffold_neologism_count: int = 0   # Invented words detected in naming pass
+    scaffold_cross_lingual_scripts: list = field(default_factory=list)  # Scripts that bled through
 
     # ── Characterization ────────────────────────────────────────────
     reproducibility: float = -1.0       # -1 = not yet tested

@@ -186,6 +186,26 @@ MUNDANE_DOMAINS = {
         "format", "style", "bold", "italic", "font", "size",
         "table", "column", "row", "cell", "header", "footer",
         "note", "reference", "citation", "source", "link",
+        "output", "input", "result", "options", "benchmark",
+    },
+    "mystical_spiritual": {
+        # Discovered on 1.5B: model grounds novel concepts in spiritual authority
+        # Mundane because it's a deflection strategy, not genuine novelty
+        "ancient", "rishi", "sage", "wisdom", "sacred", "divine",
+        "cosmic", "transcendent", "spiritual", "esoteric", "hermetic",
+        "alchemical", "mystical", "enlightened", "awakened", "illuminated",
+        "vedic", "sufi", "zen", "taoist", "buddhist", "shaman",
+        "oracle", "prophecy", "revelation", "vision", "mantra",
+        "chakra", "aura", "karma", "dharma", "nirvana",
+    },
+    "coding_instruction": {
+        # Discovered on 0.5B: model leaks programming context under stress
+        "code", "script", "function", "class", "method", "variable",
+        "loop", "array", "object", "string", "integer", "boolean",
+        "python", "javascript", "sql", "html", "json", "xml",
+        "implement", "debug", "compile", "execute", "runtime",
+        "api", "database", "query", "server", "client",
+        "procedure", "rewrite", "novice", "tokenizer",
     },
 }
 
@@ -205,6 +225,11 @@ EXPECTED_DOMAINS = {
         "metric", "distance", "norm", "inner", "product", "dual",
         "homomorphism", "isomorphism", "morphism", "functor",
         "category", "object", "arrow", "composition",
+        # Added from high-performing prompts in screening runs
+        "fractal", "entropy", "singularity", "holographic",
+        "knot", "braid", "cobordism", "homotopy",
+        "stochastic", "probabilistic", "random", "measure",
+        "lattice", "poset", "boolean", "distributive",
     },
     "physics": {
         "energy", "force", "momentum", "mass", "velocity",
@@ -214,6 +239,11 @@ EXPECTED_DOMAINS = {
         "spacetime", "curvature", "geodesic", "metric",
         "entropy", "temperature", "thermodynamic", "statistical",
         "photon", "electron", "boson", "fermion", "spin",
+        # Added from high-performing prompts
+        "calabi", "yau", "yang", "mills", "riemann",
+        "laplace", "einstein", "weyl", "dirac",
+        "duality", "holography", "instanton", "soliton",
+        "retrocausal", "non-orientable", "compactification",
     },
 }
 
